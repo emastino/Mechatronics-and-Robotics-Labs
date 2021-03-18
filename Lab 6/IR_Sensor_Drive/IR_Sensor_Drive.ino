@@ -7,9 +7,11 @@
 // IR SENSORS
 const int leftPin = A0; // Analog pin for left IR sensor
 const int rightPin = A1; // Analog pin for right IR sensor
-const int digPinLeft = 6; // digital pin for the IR sensor
-int leftVal = 0;//right; // values from left and right analog pins
-int thresh = 400;
+const int digPinLeft = 6; // digital pin for left IR sensor
+const int digPinRight = 7; // digital pin for right IR sensor
+int leftVal, rightVal; // values from left and right analog pins
+int threshLeft = 600;
+int threshRight = 500;
 
 // MOTOR CONTROL
 // Pins for all inputs, keep in mind the PWM defines must be on PWM pins
@@ -30,16 +32,18 @@ const int offsetB = 1;
 // motors as you have memory for.  If you are using functions like forward
 // that take 2 motors as arguements you can either write new functions or
 // call the function more than once.
-Motor motor1 = Motor(AIN1, AIN2, PWMA, offsetA, STBY);
-Motor motor2 = Motor(BIN1, BIN2, PWMB, offsetB, STBY);
+Motor motor1 = Motor(AIN1, AIN2, PWMA, offsetA, STBY); // right
+Motor motor2 = Motor(BIN1, BIN2, PWMB, offsetB, STBY); // left
 
+int botSpeed = 75;
 
 
 void setup() {
    Serial.begin(9600); // Starting Serial Terminal
    pinMode(leftPin, INPUT);
-//   pinMode(rightPin, INPUT);
+   pinMode(rightPin, INPUT);
    pinMode(digPinLeft,OUTPUT);
+   delay(1000);
 }
 
 void loop() {
@@ -47,12 +51,22 @@ void loop() {
   digitalWrite(digPinLeft,HIGH); 
   delayMicroseconds(500);
   leftVal = analogRead(leftPin);
-  
-//  right = analogRead(rightPin);
+  digitalWrite(digPinLeft,LOW); 
 
-  Serial.println(leftVal);
-//  driveControl(left, right);
-   
+
+
+  digitalWrite(digPinRight,HIGH); 
+  delayMicroseconds(500);
+  rightVal = analogRead(rightPin);
+  digitalWrite(digPinRight,LOW); 
+
+  
+  Serial.print(leftVal);
+  Serial.print(", ");
+  Serial.println(rightVal);
+//  left(motor1, motor2,75);
+  driveControl(leftVal, rightVal);
+  delay(50);
 }
 
 
@@ -60,8 +74,23 @@ void loop() {
 
 void driveControl(int l, int r){
 
-  if(l >=thresh && r >=thresh){
-    
+  if((l >= threshLeft) && (r >=threshRight)){
+    brake(motor1, motor2); 
+    Serial.println("If #1");
   }
   
+  if((l >=threshLeft) && !(r >= threshRight)){
+    right(motor1, motor2, botSpeed); 
+    Serial.println("If #2");
+  }
+
+  if(!(l >=threshLeft) && (r >=threshRight)){
+    left(motor1, motor2, botSpeed); 
+    Serial.println("If #3");
+  }
+
+  if(!(l >=threshLeft) && !(r >=threshRight)){
+    forward(motor1, motor2, botSpeed); 
+    Serial.println("If #4");
+  }
 }
