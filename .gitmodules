@@ -1,0 +1,3 @@
+[submodule "Project/Project/SEEx-Project"]
+	path = Project/Project/SEEx-Project
+	url = https://github.com/emastino/SEEx-Project.git
